@@ -1,10 +1,6 @@
 <?php
 
 class Cocoon {
-	function __construct() {
-
-	}
-
 	public static function SoapClient($reqId) {
 		$wsdl = 'https://wordpress.use-cocoon.nl/webservice/wsdl';
 		$domain = get_option('cn_domain');
@@ -42,23 +38,42 @@ class Cocoon {
 		return self::SoapClient($this->getRequestId())->getFile($fileId);
 	}
 
-	function getThumbUrl($fileId) {
-		$url = 'https://wordpress.use-cocoon.com';
-		$thumbType = 'original';
+	function getThumbInfo($fileId) {
+		$subdomain = get_option('cn_domain');
+		$url = 'https://' . $subdomain . '.use-cocoon.com';
+		$thumbOrg = 'original';
+		$thumbWeb = '400px';
 
 		$aThumbTypes = $this->getThumbTypes();
-		$thumbTypePath = $aThumbTypes[$thumbType]['path'];
+		$thumbOrgPath = $aThumbTypes[$thumbOrg]['path'];
+		$thumbWebPath = $aThumbTypes[$thumbWeb]['path'];
 
 		$aFile = $this->getFile($fileId);
 		$filename = $aFile['filename'];
 		$extention = $aFile['extension'];
 
-		$thumbTypeExtention = $thumbType == 'original' || $thumbType == 'gif' || $thumbType == 'png' ? $extention : 'jpg';
+		$thumbTypeExtention = $thumbOrg == 'original' || $thumbOrg == 'gif' || $thumbOrg == 'png' ? $extention : 'jpg';
 
-		return $fileUrl = $url . $thumbTypePath . '/' . $filename . '.' . $thumbTypeExtention;
+		return array(
+			'path' => $url . $thumbOrgPath . '/' . $filename . '.' . $thumbTypeExtention,
+			'web' => $url . $thumbWebPath . '/' . $filename . '.' . $thumbTypeExtention,
+			'ext' => $thumbTypeExtention,
+			'name' =>$filename
+		);
 	}
 
 	public function getRequestId() {
 		return (string)microtime(true);
+	}
+
+	function getVersion() {
+		$output = '';
+		try {
+			$output = self::SoapClient($this->getRequestId())->getVersion();
+		} catch(SoapFault $oSoapFault) {
+			// reserved
+		}
+
+		return $output;
 	}
 }

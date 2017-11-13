@@ -1,6 +1,8 @@
 #cn-wrap {
-    margin: 1%;
+    overflow-y: scroll;
+    margin: 0 1%;
     width: 98%;
+    height: 100%;
 }
 
 #cn-header {
@@ -9,33 +11,56 @@
 }
 
 #cn-sidebar {
+    border-right: 1px solid #cccccc;
+    height: 100%;
     vertical-align: top;
     width: 20%;
     display: inline-block;
 }
 
 #cn-content {
-    width: 79%;
+    width: 48%;
     display: inline-block;
+}
+
+#cn-sidebar-right {
+    border-left: 1px solid #cccccc;
+    height: 100%;
+    vertical-align: top;
+    width: 30%;
+    display: inline-block;
+}
+
+#cn-sidebar-right table {
+    width: 100%;
+}
+
+#cn-sidebar-right th {
+    text-align: right;
+}
+
+#cn-sidebar-right input, #cn-sidebar-right textarea {
+    width: 100%;
 }
 
 .cn-thumb {
     cursor: pointer;
     position: relative;
-    height: 240px;
-    width: 180px;
-    margin: 10px;
-    padding: 10px;
+    height: 160px;
+    width: 120px;
+    margin: 5px;
+    padding: 5px;
     border: 1px solid #888;
-    border-radius: 5px;
+    border-radius: 4px;
+    font-size: 12px;
     overflow: hidden;
     display: inline-block;
-    box-shadow: 0 0 10px #aaa;
+    box-shadow: 0 0 8px #bcbcbc;
 }
 
 .cn-thumb .cn-image {
     width: 100%;
-    height: 180px;
+    height: 120px;
     background-size: cover;
     background-position: center;
 }
@@ -43,8 +68,41 @@
 .cn-title {
     position: absolute;
     bottom: 10px;
-    width: 180px;
+    width: 120px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+#cn-footer {
+    left: 50px;
+    position: absolute;
+    bottom: 10px;
+    right: 50px;
+    text-align: right;
+    margin: 10px 0;
+}
+
+.cn-active {
+    background-color: #cccccc;
+}
+
+#cn-loader {
+    z-index: 10;
+    display: none;
+    background-color: rgba(255, 255, 255, 0.8);
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+#cn-loader span {
+    background-image: url("../img/cn_loader.gif");
+    background-size: 100% 100%;
+    display: block;
+    width: 72px;
+    height: 72px;
+    margin: 200px auto 0;
 }
