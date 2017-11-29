@@ -23,19 +23,39 @@ class Cocoon {
 	}
 
 	function getThumbTypes() {
-		return self::SoapClient($this->getRequestId())->getThumbtypes();
+		try {
+			$output = self::SoapClient($this->getRequestId())->getThumbtypes();
+		} catch(SoapFault $oSoapFault) {
+			$output = $this->errorResponse($oSoapFault->faultstring);
+		}
+		return $output;
 	}
 
 	function getSets() {
-		return self::SoapClient($this->getRequestId())->getSets();
+		try {
+			$output = self::SoapClient($this->getRequestId())->getSets();
+		} catch(SoapFault $oSoapFault) {
+			$output = $this->errorResponse($oSoapFault->faultstring);
+		}
+		return $output;
 	}
 
 	function getFilesBySet($setId) {
-		return self::SoapClient($this->getRequestId())->getFilesBySet($setId);
+		try {
+			$output = self::SoapClient($this->getRequestId())->getFilesBySet($setId);
+		} catch(SoapFault $oSoapFault) {
+			$output = $this->errorResponse($oSoapFault->faultstring);
+		}
+		return $output;
 	}
 
 	function getFile($fileId) {
-		return self::SoapClient($this->getRequestId())->getFile($fileId);
+		try {
+			$output = self::SoapClient($this->getRequestId())->getFile($fileId);
+		} catch(SoapFault $oSoapFault) {
+			$output = $this->errorResponse($oSoapFault->faultstring);
+		}
+		return $output;
 	}
 
 	function getThumbInfo($fileId) {
@@ -52,13 +72,27 @@ class Cocoon {
 		$filename = $aFile['filename'];
 		$extention = $aFile['extension'];
 
+
+
 		$thumbTypeExtention = $thumbOrg == 'original' || $thumbOrg == 'gif' || $thumbOrg == 'png' ? $extention : 'jpg';
+		$fileDim = $aFile['width'] && $aFile['height'] ? $aFile['width'] . ' x ' . $aFile['height'] : '';
+		$fileSize = $aFile['size'] ? round($aFile['size'] / 1024) . ' KB' : '';
+
+		if($aFile['upload_date']) {
+			$date = date_create($aFile['upload_date']);
+			$fileUploaded = date_format($date, get_option( 'date_format' ));
+		} else {
+			$fileUploaded = '';
+		}
 
 		return array(
 			'path' => $url . $thumbOrgPath . '/' . $filename . '.' . $thumbTypeExtention,
 			'web' => $url . $thumbWebPath . '/' . $filename . '.' . $thumbTypeExtention,
 			'ext' => $thumbTypeExtention,
-			'name' =>$filename
+			'name' => $filename,
+			'dim' => $fileDim,
+			'size' => $fileSize,
+			'uploaded' => $fileUploaded
 		);
 	}
 
@@ -66,12 +100,16 @@ class Cocoon {
 		return (string)microtime(true);
 	}
 
+	private function errorResponse($errMsg) {
+		return json_encode( array( 'status' => 'error', 'statusMsg' => $errMsg ) );
+	}
+
 	function getVersion() {
 		$output = '';
 		try {
 			$output = self::SoapClient($this->getRequestId())->getVersion();
 		} catch(SoapFault $oSoapFault) {
-			// reserved
+			$output = $this->errorResponse($oSoapFault->faultstring);
 		}
 
 		return $output;
