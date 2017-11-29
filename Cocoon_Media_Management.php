@@ -123,11 +123,6 @@ function cnNewForm() {
         </div>
 
         <div id="cn-sidebar">
-            <script>
-                jQuery(function($) {
-
-                });
-            </script>
             <div class="cn-sidebar-wrap">
                 <h2><?php _e('Available sets', PLUGINDOMAIN); ?></h2>
                 <ul id="cn-sets-list"></ul>
