@@ -17,7 +17,6 @@ jQuery(function($) {
             }
         });
 
-
         var selectedImage = {
             path: "",
             name: "",
@@ -37,6 +36,7 @@ jQuery(function($) {
             selectedImage.ext = $(this).data("cnext");
             selectedImage.size = $(this).data("cnsize");
             selectedImage.dim = $(this).data("cndim");
+            selectedImage.domain = $(this).data("cndomain");
             selectedImage.uploaded = $(this).data("cnuploaded");
             $(".cn-thumb").removeClass("cn-active");
             $(this).addClass("cn-active");
@@ -102,11 +102,13 @@ jQuery(function($) {
 
         $("#cn-form-insert").on("click", function() {
             $("#cn-loader").show();
+            var thumoType = $("#cn-form-thumb-types").val();
+            var uploadUrl = selectedImage.domain + thumoType + '/' + selectedImage.name + '.' + selectedImage.ext;
             $.ajax({
                 url: wp_vars.ajax_url,
                 data: {
                     action: "cn_upload_image",
-                    path: selectedImage.path,
+                    path: uploadUrl,
                     ext: selectedImage.ext,
                     name: selectedImage.name,
                     title: $("#cn-form-title").val(),
@@ -164,11 +166,16 @@ jQuery(function($) {
             $("#cn-form-alt").val("");
         }
 
-        $("#cn-form-search-submit").on("click", function() {
+        $("#cn-form-search").bind("enterKey",function(e){
             setId = "search";
             pageNo = 0;
             hasThumbs = true;
             getThumbs(pageNo);
-        })
+        });
+        $("#cn-form-search").keyup(function(e){
+            if(e.keyCode == 13) {
+                $(this).trigger("enterKey");
+            }
+        });
     })
 });

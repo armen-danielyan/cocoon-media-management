@@ -92,7 +92,8 @@ class Cocoon {
 			'name' => $filename,
 			'dim' => $fileDim,
 			'size' => $fileSize,
-			'uploaded' => $fileUploaded
+			'uploaded' => $fileUploaded,
+			'domain' => $url
 		);
 	}
 

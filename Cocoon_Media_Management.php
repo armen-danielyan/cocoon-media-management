@@ -115,6 +115,7 @@ function cnAddNewForm() {
 }
 
 function cnNewForm() {
+	global $cocoonController;
 	media_upload_header(); ?>
 
     <div id="cn-wrap">
@@ -132,7 +133,6 @@ function cnNewForm() {
         <div id="cn-header">
             <div id="cn-search-wrap" style="display: inline-block">
                 <input type="text" id="cn-form-search" placeholder="<?php _e('Search media items...', PLUGINDOMAIN); ?>" value="">
-                <button type="button" class="button" id="cn-form-search-submit"><?php _e('Search', PLUGINDOMAIN); ?></button>
             </div>
         </div>
 
@@ -152,6 +152,21 @@ function cnNewForm() {
                         <div id="cn-form-dim"></div>
                     </div>
                 </div>
+
+                <label class="cn-form-label-wrap">
+                    <span><?php _e('Available Sizes', PLUGINDOMAIN); ?></span>
+                    <select id="cn-form-thumb-types">
+			            <?php $thumbTypes = $cocoonController->getThumbTypes();
+			            foreach($thumbTypes as $key => $value) {
+			                if($key !== 'original') {
+			                    $opText = $key . ' ' . __('versie', PLUGINDOMAIN) . '(' . __('width', PLUGINDOMAIN) . ' ' . $value['width'] . 'px)';
+			                } else {
+			                    $opText = $key . ' ' . __('versie', PLUGINDOMAIN);
+                            } ?>
+                            <option value="<?php echo $value['path']; ?>"><?php echo $opText; ?></option>
+			            <?php } ?>
+                    </select>
+                </label>
 
                 <label class="cn-form-label-wrap">
                     <span><?php _e('URL', PLUGINDOMAIN); ?></span>
@@ -262,7 +277,8 @@ function getFilesBySet() {
              data-cnsize="<?php echo $thumbInfo['size']; ?>"
              data-cndim="<?php echo $thumbInfo['dim']; ?>"
              data-cnuploaded="<?php echo $thumbInfo['uploaded']; ?>"
-             data-web="<?php echo $thumbInfo['web']; ?>">
+             data-web="<?php echo $thumbInfo['web']; ?>"
+             data-cndomain="<?php echo $thumbInfo['domain']; ?>">
             <div class="cn-image" style="background-image: url('<?php echo $thumbInfo["web"]; ?>')"></div>
             <div class="cn-title"><?php echo $setFiles[$i]['title']; ?></div>
         </div>
