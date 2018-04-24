@@ -1,0 +1,7 @@
+subdomain: wordpress
+user: wordpress
+secret: uP2&SjSvG7lJFTZH7D3r_.VKlqejyw6Q
+
+subdomain: staging
+user: stagingwordpress
+secret: xi*{Xd({@,2s{T-5EECk6wW6IjM@_+gk

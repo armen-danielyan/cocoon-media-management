@@ -1,5 +1,4 @@
 === Cocoon Media Management ===
-
 Tags: gallery, photo gallery, image gallery, wordpress gallery plugin, photo albums, wordpress photo gallery plugin
 Requires at least: 3.3
 Tested up to: 4.9.5

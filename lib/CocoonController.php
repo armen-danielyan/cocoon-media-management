@@ -1,12 +1,11 @@
 <?php
-
-class Cocoon {
+class CMM_Cocoon {
 	public static function SoapClient($reqId) {
-		$wsdl = 'https://wordpress.use-cocoon.nl/webservice/wsdl';
-		$domain = get_option('cn_domain');
-		$username = get_option('cn_username');
+		$domain = get_option('cmm_stng_domain');
+		$username = get_option('cmm_stng_username');
 		$requestId = $reqId;
-		$secretkey = get_option('cn_secret');
+		$secretkey = get_option('cmm_stng_secret');
+		$wsdl = "https://{$domain}.use-cocoon.nl/webservice/wsdl";
 
 		$hash = sha1($domain . $username . $requestId . $secretkey);
 
@@ -26,7 +25,7 @@ class Cocoon {
 		try {
 			$output = self::SoapClient($this->getRequestId())->getThumbtypes();
 		} catch(SoapFault $oSoapFault) {
-			$output = $this->errorResponse($oSoapFault->faultstring);
+			$output = $oSoapFault;
 		}
 		return $output;
 	}
@@ -35,7 +34,7 @@ class Cocoon {
 		try {
 			$output = self::SoapClient($this->getRequestId())->getSets();
 		} catch(SoapFault $oSoapFault) {
-			$output = $this->errorResponse($oSoapFault->faultstring);
+			$output = $oSoapFault;
 		}
 		return $output;
 	}
@@ -44,7 +43,7 @@ class Cocoon {
 		try {
 			$output = self::SoapClient($this->getRequestId())->getFilesBySet($setId);
 		} catch(SoapFault $oSoapFault) {
-			$output = $this->errorResponse($oSoapFault->faultstring);
+			$output = $oSoapFault;
 		}
 		return $output;
 	}
@@ -53,14 +52,14 @@ class Cocoon {
 		try {
 			$output = self::SoapClient($this->getRequestId())->getFile($fileId);
 		} catch(SoapFault $oSoapFault) {
-			$output = $this->errorResponse($oSoapFault->faultstring);
+			$output = $oSoapFault;
 		}
 		return $output;
 	}
 
 	function getThumbInfo($fileId) {
-		$subdomain = get_option('cn_domain');
-		$url = 'https://' . $subdomain . '.use-cocoon.com';
+		$subdomain = get_option('cmm_stng_domain');
+		$url = "https://{$subdomain}.use-cocoon.com";
 		$thumbOrg = 'original';
 		$thumbWeb = '400px';
 
@@ -71,8 +70,6 @@ class Cocoon {
 		$aFile = $this->getFile($fileId);
 		$filename = $aFile['filename'];
 		$extention = $aFile['extension'];
-
-
 
 		$thumbTypeExtention = $thumbOrg == 'original' || $thumbOrg == 'gif' || $thumbOrg == 'png' ? $extention : 'jpg';
 		$fileDim = $aFile['width'] && $aFile['height'] ? $aFile['width'] . ' x ' . $aFile['height'] : '';
@@ -106,13 +103,11 @@ class Cocoon {
 	}
 
 	function getVersion() {
-		$output = '';
 		try {
 			$output = self::SoapClient($this->getRequestId())->getVersion();
 		} catch(SoapFault $oSoapFault) {
-			$output = $this->errorResponse($oSoapFault->faultstring);
+			$output = $oSoapFault;
 		}
-
 		return $output;
 	}
 }

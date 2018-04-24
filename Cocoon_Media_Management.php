@@ -1,14 +1,14 @@
 <?php
 /**
  * @package Cocoon Media Management
- * @version 0.0.1
+ * @version 1.04
  */
 /*
 Plugin Name: Cocoon Media Management
 Plugin URI: http://www.use-cocoon.nl/
 Description: Load images from Cocoon.
-Version: 0.0.4
-Author: Danielyan
+Version: 1.04
+Author: Cocoon Software Tech
 Author URI: http://www.use-cocoon.nl/
 License: GPLv2 or later
 Text Domain: use-cocoon.nl
@@ -21,72 +21,71 @@ Text Domain: use-cocoon.nl
  */
 
 defined( 'ABSPATH' ) or die( 'Direct Access to This File is Not Allowed.' );
-define('PLUGINDOMAIN', 'Cocoon-Media-Management');
+define('CMM_VERSION', '0.0.4');
 
 require_once( 'lib/CocoonController.php' );
+$cocoonController = new CMM_Cocoon();
 
-$cocoonController = new Cocoon();
+add_action( 'admin_enqueue_scripts', 'CMM_AddCocoonScripts' );
 
-add_action( 'admin_enqueue_scripts', 'addCocoonScripts' );
-
-function addCocoonScripts() {
-	wp_enqueue_script( 'cn_main_js', plugin_dir_url( __FILE__ ) . 'js/main.js', '', VERSION );
+function CMM_AddCocoonScripts() {
+	wp_enqueue_script( 'cn_main_js', plugin_dir_url( __FILE__ ) . 'js/main.js', '', CMM_VERSION );
 	wp_localize_script( 'cn_main_js', 'wp_vars', array(
 		'ajax_url' => admin_url( 'admin-ajax.php' )
 	) );
 
-	wp_enqueue_style( 'cn_main_css', plugin_dir_url( __FILE__ ) . 'css/main.css', '', VERSION );
+	wp_enqueue_style( 'cn_main_css', plugin_dir_url( __FILE__ ) . 'css/main.css', '', CMM_VERSION );
 }
 
-add_action( 'admin_menu', 'cocoonSettingsPage' );
+add_action( 'admin_menu', 'CMM_CocoonSettings' );
 
-function cocoonSettingsPage() {
-	add_menu_page( __('Cocoon Plugin Settings', PLUGINDOMAIN), __('Cocoon Settings', PLUGINDOMAIN), 'administrator', __FILE__, 'cocoon_settings_page', plugins_url( '/img/icon.png', __FILE__ ) );
-	add_action( 'admin_init', 'register_cocoon_settings' );
+function CMM_CocoonSettings() {
+	add_menu_page( __('Cocoon Plugin Settings', 'cocoon-media-management'), __('Cocoon Settings', 'cocoon-media-management'), 'administrator', __FILE__, 'CMM_CocoonSettingsPage', plugins_url( '/img/icon.png', __FILE__ ) );
+	add_action( 'admin_init', 'CMM_RegisterCocoonSettings' );
 }
 
-function register_cocoon_settings() {
-	register_setting( 'cocoon-main-group', 'cn_domain' );
-	register_setting( 'cocoon-main-group', 'cn_secret' );
-	register_setting( 'cocoon-main-group', 'cn_username' );
+function CMM_RegisterCocoonSettings() {
+	register_setting( 'cocoon-main-group', 'cmm_stng_domain' );
+	register_setting( 'cocoon-main-group', 'cmm_stng_secret' );
+	register_setting( 'cocoon-main-group', 'cmm_stng_username' );
 }
 
-function cocoon_settings_page() { ?>
+function CMM_CocoonSettingsPage() { ?>
     <div class="wrap">
-        <h1><?php _e('Cocoon Settings', PLUGINDOMAIN); ?></h1>
+        <h1><?php _e('Cocoon Settings', 'cocoon-media-management'); ?></h1>
 
         <form method="post" action="options.php">
 			<?php settings_fields( 'cocoon-main-group' ); ?>
 			<?php do_settings_sections( 'cocoon-main-group' ); ?>
             <table class="form-table">
                 <tr valign="top">
-                    <th scope="row"><?php _e('Domain', PLUGINDOMAIN); ?></th>
-                    <td><input type="text" class="regular-text" name="cn_domain"
-                               value="<?php echo esc_attr( get_option( 'cn_domain' ) ); ?>"/>
-                        <p><i><?php _e('Subdomain', PLUGINDOMAIN); ?></i></p></td>
+                    <th scope="row"><?php _e('Subdomain', 'cocoon-media-management'); ?></th>
+                    <td><input type="text" class="regular-text" name="cmm_stng_domain"
+                               value="<?php echo esc_attr( get_option( 'cmm_stng_domain' ) ); ?>"/>
+                        <p><i><?php _e('Please	fill in	only your subdomain	name', 'cocoon-media-management'); ?></i></p></td>
                 </tr>
 
                 <tr valign="top">
-                    <th scope="row"><?php _e('Username', PLUGINDOMAIN); ?></th>
-                    <td><input type="text" class="regular-text" name="cn_username"
-                               value="<?php echo esc_attr( get_option( 'cn_username' ) ); ?>"/>
-                        <p><i><?php _e('Your Username', PLUGINDOMAIN); ?></i></p></td>
+                    <th scope="row"><?php _e('Username', 'cocoon-media-management'); ?></th>
+                    <td><input type="text" class="regular-text" name="cmm_stng_username"
+                               value="<?php echo esc_attr( get_option( 'cmm_stng_username' ) ); ?>"/>
+                        <p><i><?php _e('Your Username', 'cocoon-media-management'); ?></i></p></td>
                 </tr>
 
                 <tr valign="top">
-                    <th scope="row"><?php _e('Secret Key', PLUGINDOMAIN); ?></th>
-                    <td><input type="password" class="regular-text" name="cn_secret"
-                               value="<?php echo esc_attr( get_option( 'cn_secret' ) ); ?>"/>
-                        <p><i><?php _e('Your Secret Key', PLUGINDOMAIN); ?></i></p></td>
+                    <th scope="row"><?php _e('Secret Key', 'cocoon-media-management'); ?></th>
+                    <td><input type="password" class="regular-text" name="cmm_stng_secret"
+                               value="<?php echo esc_attr( get_option( 'cmm_stng_secret' ) ); ?>"/>
+                        <p><i><?php _e('Your Secret Key', 'cocoon-media-management'); ?></i></p></td>
                 </tr>
 
                 <tr valign="top">
-                    <th scope="row"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php _e('Save Settings', PLUGINDOMAIN); ?>"></th>
+                    <th scope="row"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php _e('Save Settings', 'cocoon-media-management'); ?>"></th>
                     <td>
-                        <p style="display: none" id="cn-thumb-up"><img width="32" height="32" src="<?php echo plugin_dir_url( __FILE__ ) . 'img/thumb_up.png' ?>"> <?php _e('Cocoon account successfully connected.', PLUGINDOMAIN); ?></p>
-                        <p style="display: none" id="cn-thumb-down"><img width="32" height="32" src="<?php echo plugin_dir_url( __FILE__ ) . 'img/thumb_down.png' ?>"> <?php _e('You have entered wrong Cocoon API credentials, please try again.', PLUGINDOMAIN); ?></p>
-                        <?php if (!get_option( 'cn_domain' ) || !get_option( 'cn_username' ) || !get_option( 'cn_secret' )) { ?>
-                            <p id="cn-error-msg"><?php _e('Please enter your Cocoon API credentials.', PLUGINDOMAIN); ?></p>;
+                        <p style="display: none" id="cn-thumb-up"><img width="32" height="32" src="<?php echo plugin_dir_url( __FILE__ ) . 'img/thumb_up.png' ?>"> <?php _e('Cocoon account successfully connected.', 'cocoon-media-management'); ?></p>
+                        <p style="display: none" id="cn-thumb-down"><img width="32" height="32" src="<?php echo plugin_dir_url( __FILE__ ) . 'img/thumb_down.png' ?>"> <?php _e('You have entered wrong Cocoon API credentials, please try again.', 'cocoon-media-management'); ?></p>
+                        <?php if (!get_option( 'cmm_stng_domain' ) || !get_option( 'cmm_stng_username' ) || !get_option( 'cmm_stng_secret' )) { ?>
+                            <p id="cn-error-msg"><?php _e('Please enter your Cocoon API credentials.', 'cocoon-media-management'); ?></p>
                         <?php } ?>
                     </td>
                 </tr>
@@ -100,21 +99,21 @@ function cocoon_settings_page() { ?>
  * Make Media Upload Tab
  */
 
-add_filter( 'media_upload_tabs', 'cnUploadTab' );
+add_filter( 'media_upload_tabs', 'CMM_UploadTab' );
 
-function cnUploadTab( $tabs ) {
-	$tabs['cocoonmediabank'] = __('Cocoon Media Management', PLUGINDOMAIN);
+function CMM_UploadTab( $tabs ) {
+	$tabs['cocoonmediabank'] = __('Cocoon Media Management', 'cocoon-media-management');
 
 	return $tabs;
 }
 
-add_action( 'media_upload_cocoonmediabank', 'cnAddNewForm' );
+add_action( 'media_upload_cocoonmediabank', 'CMM_AddNewForm' );
 
-function cnAddNewForm() {
-	wp_iframe( 'cnNewForm');
+function CMM_AddNewForm() {
+	wp_iframe( 'CMM_NewForm');
 }
 
-function cnNewForm() {
+function CMM_NewForm() {
 	global $cocoonController;
 	media_upload_header(); ?>
 
@@ -125,14 +124,14 @@ function cnNewForm() {
 
         <div id="cn-sidebar">
             <div class="cn-sidebar-wrap">
-                <h2><?php _e('Available sets', PLUGINDOMAIN); ?></h2>
+                <h2><?php _e('Available sets', 'cocoon-media-management'); ?></h2>
                 <ul id="cn-sets-list"></ul>
             </div>
         </div>
 
         <div id="cn-header">
             <div id="cn-search-wrap" style="display: inline-block">
-                <input type="text" id="cn-form-search" placeholder="<?php _e('Search media items...', PLUGINDOMAIN); ?>" value="">
+                <input type="text" id="cn-form-search" placeholder="<?php _e('Search media items...', 'cocoon-media-management'); ?>" value="">
             </div>
         </div>
 
@@ -140,7 +139,7 @@ function cnNewForm() {
 
         <div id="cn-sidebar-right">
             <div class="cn-sidebar-wrap" style="display: none">
-                <h2><?php _e('Attachment Details', PLUGINDOMAIN); ?></h2>
+                <h2><?php _e('Attachment Details', 'cocoon-media-management'); ?></h2>
                 <div class="cn-thumb-details-wrap">
                     <div class="cn-thumb-preview">
                         <img id="cn-form-img" src="">
@@ -154,44 +153,46 @@ function cnNewForm() {
                 </div>
 
                 <label class="cn-form-label-wrap">
-                    <span><?php _e('Available Sizes', PLUGINDOMAIN); ?></span>
+                    <span><?php _e('Available Sizes', 'cocoon-media-management'); ?></span>
                     <select id="cn-form-thumb-types">
 			            <?php $thumbTypes = $cocoonController->getThumbTypes();
-			            foreach($thumbTypes as $key => $value) {
-			                if($key !== 'original') {
-			                    $opText = $key . ' ' . __('versie', PLUGINDOMAIN) . '(' . __('width', PLUGINDOMAIN) . ' ' . $value['width'] . 'px)';
-			                } else {
-			                    $opText = $key . ' ' . __('versie', PLUGINDOMAIN);
-                            } ?>
-                            <option value="<?php echo $value['path']; ?>"><?php echo $opText; ?></option>
-			            <?php } ?>
+			            if(!is_soap_fault($thumbTypes)) {
+				            foreach ( $thumbTypes as $key => $value ) {
+					            if ( $key !== 'original' ) {
+						            $opText = $key . ' ' . __( 'versie', 'cocoon-media-management' ) . '(' . __( 'width', 'cocoon-media-management' ) . ' ' . $value['width'] . 'px)';
+					            } else {
+						            $opText = $key . ' ' . __( 'versie', 'cocoon-media-management' );
+					            } ?>
+                                <option value="<?php echo $value['path']; ?>"><?php echo $opText; ?></option>
+				            <?php }
+			            } ?>
                     </select>
                 </label>
 
                 <label class="cn-form-label-wrap">
-                    <span><?php _e('URL', PLUGINDOMAIN); ?></span>
+                    <span><?php _e('URL', 'cocoon-media-management'); ?></span>
                     <input type="text" id="cn-form-url" value="" disabled="disabled">
                 </label>
 
                 <label class="cn-form-label-wrap">
-                    <span><?php _e('Title', PLUGINDOMAIN); ?></span>
+                    <span><?php _e('Title', 'cocoon-media-management'); ?></span>
                     <input type="text" id="cn-form-title" value="">
                 </label>
 
                 <label class="cn-form-label-wrap">
-                    <span><?php _e('Caption', PLUGINDOMAIN); ?></span>
+                    <span><?php _e('Caption', 'cocoon-media-management'); ?></span>
                     <textarea id="cn-form-caption"></textarea>
                 </label>
 
                 <label class="cn-form-label-wrap">
-                    <span><?php _e('Alt Text', PLUGINDOMAIN); ?></span>
+                    <span><?php _e('Alt Text', 'cocoon-media-management'); ?></span>
                     <input type="text" id="cn-form-alt" value="">
                 </label>
 
                 <label class="cn-form-label-wrap">
-                    <span><?php _e('Size', PLUGINDOMAIN); ?></span>
+                    <span><?php _e('Size', 'cocoon-media-management'); ?></span>
                     <select id="cn-form-thumb-size">
-	                    <?php $imageSizes = get_image_sizes();
+	                    <?php $imageSizes = CMM_GetImageSizes();
 	                    foreach($imageSizes as $imageSize) { ?>
                             <option value="<?php echo $imageSize['name']; ?>"><?php echo ucfirst($imageSize['name']) . ' - ' . $imageSize['width'] . ' x ' . $imageSize['height']; ?></option>
                         <?php } ?>
@@ -202,20 +203,20 @@ function cnNewForm() {
         </div>
 
         <div id="cn-footer">
-            <button type="button" class="button button-primary" disabled="disabled" id="cn-form-insert"><?php _e('Insert into post', PLUGINDOMAIN); ?></button>
+            <button type="button" class="button button-primary" disabled="disabled" id="cn-form-insert"><?php _e('Insert into post', 'cocoon-media-management'); ?></button>
         </div>
     </div>
 <?php
 }
 
-function get_image_sizes() {
+function CMM_GetImageSizes() {
     $sizes = array();
     $get_intermediate_image_sizes = get_intermediate_image_sizes();
-    foreach( $get_intermediate_image_sizes as $_size ) {
-        if ( in_array( $_size, array( 'thumbnail', 'medium', 'large' ) ) ) {
-            $tmp['name'] = $_size;
-	        $tmp['width'] = get_option( $_size . '_size_w' );
-	        $tmp['height'] = get_option( $_size . '_size_h' );
+    foreach( $get_intermediate_image_sizes as $item_size ) {
+        if ( in_array( $item_size, array( 'thumbnail', 'medium', 'large' ) ) ) {
+            $tmp['name'] = $item_size;
+	        $tmp['width'] = get_option( $item_size . '_size_w' );
+	        $tmp['height'] = get_option( $item_size . '_size_h' );
 
 	        array_push($sizes, $tmp);
         }
@@ -224,10 +225,10 @@ function get_image_sizes() {
 }
 
 
-add_action( 'wp_ajax_get_files_by_set', 'getFilesBySet' );
-add_action( 'wp_ajax_nopriv_get_files_by_set', 'getFilesBySet' );
+add_action( 'wp_ajax_get_files_by_set', 'CMM_GetFilesBySet' );
+add_action( 'wp_ajax_nopriv_get_files_by_set', 'CMM_GetFilesBySet' );
 
-function getFilesBySet() {
+function CMM_GetFilesBySet() {
 	global $cocoonController;
 	ob_start();
 
@@ -235,33 +236,42 @@ function getFilesBySet() {
 		return json_encode( array( 'status' => 'error', 'statusMsg' => 'Nothing has found!' ) );
 	}
 
-	$keyword = $_POST['keyword'] ? $_POST['keyword'] : '';
+	$keyword = $_POST['keyword'] ? sanitize_text_field($_POST['keyword']) : '';
 
-	$setId = $_POST['setId'];
-	$pageNo = $_POST['pageNo'];
+	$setId = sanitize_text_field($_POST['setId']);
+	$pageNo = (int)sanitize_text_field($_POST['pageNo']);
 	$pagePer = 48;
 	$setFiles = [];
 
 	if($setId === 'all') {
 		$sets = $cocoonController->getSets();
-		foreach ($sets as $set) {
-			$setFiles = array_merge($setFiles, $cocoonController->getFilesBySet( $set['id'] ));
-		}
+		if(!is_soap_fault($sets)) {
+			foreach ($sets as $set) {
+				$setFiles = array_merge($setFiles, $cocoonController->getFilesBySet( $set['id'] ));
+			}
+        }
     } else if($setId === 'search') {
 		$setFilesTmp = [];
 		$sets = $cocoonController->getSets();
 
-		foreach ($sets as $set) {
-			$setFilesTmp = array_merge($setFilesTmp, $cocoonController->getFilesBySet( $set['id'] ));
-			foreach ( $setFilesTmp as $setFile ) {
-				if (strpos($setFile['title'], $keyword) !== false || !$keyword) {
-					array_push($setFiles, $setFile);
-				}
+		if(!is_soap_fault($sets)) {
+			foreach ($sets as $set) {
+			    $filesBySet = $cocoonController->getFilesBySet( $set['id'] );
+			    if(!is_soap_fault($filesBySet)) {
+				    $setFilesTmp = array_merge($setFilesTmp, $filesBySet);
+				    foreach ( $setFilesTmp as $setFile ) {
+					    if (strpos($setFile['title'], $keyword) !== false || !$keyword) {
+						    array_push($setFiles, $setFile);
+					    }
+				    }
+                }
 			}
 		}
-
     } else {
-		$setFiles = $cocoonController->getFilesBySet( $setId );
+		$filesBySet = $cocoonController->getFilesBySet( $setId );
+		if(!is_soap_fault($filesBySet)) {
+			$setFiles = $cocoonController->getFilesBySet( $setId );
+        }
     }
 
 	$thumbsCount = sizeof($setFiles);
@@ -269,43 +279,45 @@ function getFilesBySet() {
 	$max = $offset + $pagePer > $thumbsCount ? $thumbsCount : $offset + $pagePer;
 
 	for($i = $offset; $i < $max; $i++) {
-		$thumbInfo = $cocoonController->getThumbInfo( $setFiles[$i]['id'] ); ?>
-        <div class="cn-thumb" data-cnid="<?php echo $setFile['id']; ?>"
-             data-cnpath="<?php echo $thumbInfo['path']; ?>"
-             data-cnext="<?php echo $thumbInfo['ext']; ?>"
-             data-cnname="<?php echo $thumbInfo['name']; ?>"
-             data-cnsize="<?php echo $thumbInfo['size']; ?>"
-             data-cndim="<?php echo $thumbInfo['dim']; ?>"
-             data-cnuploaded="<?php echo $thumbInfo['uploaded']; ?>"
-             data-web="<?php echo $thumbInfo['web']; ?>"
-             data-cndomain="<?php echo $thumbInfo['domain']; ?>">
-            <div class="cn-image" style="background-image: url('<?php echo $thumbInfo["web"]; ?>')"></div>
-            <div class="cn-title"><?php echo $setFiles[$i]['title']; ?></div>
-        </div>
-	<?php }
+		$thumbInfo = $cocoonController->getThumbInfo( $setFiles[$i]['id'] );
+		if(!is_soap_fault($thumbInfo)) { ?>
+            <div class="cn-thumb" data-cnid="<?php echo $setFile['id']; ?>"
+                 data-cnpath="<?php echo $thumbInfo['path']; ?>"
+                 data-cnext="<?php echo $thumbInfo['ext']; ?>"
+                 data-cnname="<?php echo $thumbInfo['name']; ?>"
+                 data-cnsize="<?php echo $thumbInfo['size']; ?>"
+                 data-cndim="<?php echo $thumbInfo['dim']; ?>"
+                 data-cnuploaded="<?php echo $thumbInfo['uploaded']; ?>"
+                 data-web="<?php echo $thumbInfo['web']; ?>"
+                 data-cndomain="<?php echo $thumbInfo['domain']; ?>">
+                <div class="cn-image" style="background-image: url('<?php echo $thumbInfo["web"]; ?>')"></div>
+                <div class="cn-title"><?php echo $setFiles[$i]['title']; ?></div>
+            </div>
+        <?php }
+	}
 
 	$html = ob_get_contents();
 	ob_end_clean();
 	echo $html;
 
-	exit;
+	wp_die();
 };
 
 
-add_action( 'wp_ajax_cn_upload_image', 'uploadImage' );
-add_action( 'wp_ajax_nopriv_cn_upload_image', 'uploadImage' );
+add_action( 'wp_ajax_cn_upload_image', 'CMM_UploadImage' );
+add_action( 'wp_ajax_nopriv_cn_upload_image', 'CMM_UploadImage' );
 
-function uploadImage() {
+function CMM_UploadImage() {
 	global $post;
 
 	if ( !isset($_POST['path']) || !isset($_POST['ext']) || !isset($_POST['name']) ) {
 		return json_encode( array( 'status' => 'error', 'statusMsg' => 'Something went wrong!' ) );
 	}
 
-	$thumbURL = $_POST['path'];
-	$fileNameExt = $_POST['ext'];
-	$photoName = $_POST['name'];
-	$photoSize = $_POST['size'];
+	$thumbURL = sanitize_text_field($_POST['path']);
+	$fileNameExt = sanitize_text_field($_POST['ext']);
+	$photoName = sanitize_text_field($_POST['name']);
+	$photoSize = sanitize_text_field($_POST['size']);
 
 	$res = wp_remote_get( $thumbURL );
 
@@ -325,12 +337,12 @@ function uploadImage() {
 	$my_image_meta = array('ID' => $attach_id);
 	$attr = [];
 
-	if($_POST['alt']) update_post_meta($attach_id, '_wp_attachment_image_alt', $_POST['alt']);
+	if($_POST['alt']) update_post_meta($attach_id, '_wp_attachment_image_alt', sanitize_text_field($_POST['alt']));
 	if($_POST['title']) {
-	    $my_image_meta['post_title'] = $_POST['title'];
-		$attr['title'] = $_POST['title'];
+	    $my_image_meta['post_title'] = sanitize_text_field($_POST['title']);
+		$attr['title'] = sanitize_text_field($_POST['title']);
 	}
-	if($_POST['caption']) $my_image_meta['post_excerpt'] = $_POST['caption'];
+	if($_POST['caption']) $my_image_meta['post_excerpt'] = sanitize_text_field($_POST['caption']);
 	if(sizeof($my_image_meta) > 1) wp_update_post( $my_image_meta );
 
 	$attach_data = wp_generate_attachment_metadata( $attach_id, $filename );
@@ -340,32 +352,35 @@ function uploadImage() {
 
 	echo json_encode( array( 'status' => 'OK', 'data' => $html ) );
 
-	exit;
+	wp_die();
 }
 
 
-add_action( 'wp_ajax_check_creds', 'checkCreds' );
-add_action( 'wp_ajax_nopriv_check_creds', 'checkCreds' );
+add_action( 'wp_ajax_check_creds', 'CMM_CheckCreds' );
+add_action( 'wp_ajax_nopriv_check_creds', 'CMM_CheckCreds' );
 
-function checkCreds() {
+function CMM_CheckCreds() {
 	global $cocoonController;
 
 	$result = $cocoonController->getVersion();
-	if($result)
+	if(!is_soap_fault($result))
 		echo json_encode( array( 'status' => 'OK' ) );
 	else
 		echo json_encode( array( 'status' => 'error' ) );
 
-	exit;
+	wp_die();
 }
 
-add_action( 'wp_ajax_cn_get_sets', 'cnGetSets' );
-add_action( 'wp_ajax_nopriv_cn_get_sets', 'cnGetSets' );
+add_action( 'wp_ajax_cn_get_sets', 'CMM_GetSets' );
+add_action( 'wp_ajax_nopriv_cn_get_sets', 'CMM_GetSets' );
 
-function cnGetSets() {
+function CMM_GetSets() {
 	global $cocoonController;
 
 	$sets = $cocoonController->getSets();
+	if(is_soap_fault($sets)) {
+	    wp_die();
+    }
     ob_start();
     $thumbsCount = 0;
     foreach ( $sets as $set ) { ?>
@@ -386,10 +401,11 @@ function cnGetSets() {
                class="cn-sets"
                name="sets"
                value="all" <?php if($thumbsCount == 0) echo 'disabled'; ?>>
-        <label for="cnall"><?php _e('All', PLUGINDOMAIN); ?> (<?php echo $thumbsCount; ?>)</label>
+        <label for="cnall"><?php _e('All', 'cocoon-media-management'); ?> (<?php echo $thumbsCount; ?>)</label>
     </li>
     <?php $html = ob_get_contents();
 	ob_end_clean();
     echo $html;
-	exit;
+
+	wp_die();
 }
