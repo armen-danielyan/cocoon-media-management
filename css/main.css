@@ -9,10 +9,21 @@
     position: absolute;
     height: 35px;
     overflow: hidden;
-    top:0;
+    top: 0;
     left: 201px;
     right: 300px;
     padding: 15px 15px 0 15px;
+    background-color: #fff;
+}
+
+#cn-bottom {
+    position: absolute;
+    height: 35px;
+    overflow: hidden;
+    bottom: 65px;
+    left: 201px;
+    right: 300px;
+    padding: 0 15px 15px 15px;
     background-color: #fff;
 }
 
@@ -32,7 +43,7 @@
     top: 50px;
     left: 201px;
     right: 300px;
-    bottom: 65px;
+    bottom: 115px;
     overflow: auto;
     outline: 0;
     padding: 15px;
@@ -50,6 +61,16 @@
 
 .cn-sidebar-wrap {
     margin: 0 15px;
+}
+
+.cn-sidebar-wrap #cn-sets-list li {
+    margin: 0;
+    padding: 5px 0;
+}
+
+.cn-sidebar-wrap #cn-sets-list label {
+    width: 130px;
+    display: inline-block;
 }
 
 #cn-sidebar-right h2 {
@@ -110,7 +131,8 @@
 .cn-thumb .cn-image {
     width: 100%;
     height: 120px;
-    background-size: cover;
+    background-size: auto 120px;
+    background-repeat: no-repeat;
     background-position: center;
 }
 
@@ -203,4 +225,55 @@
 
 #cn-search-wrap {
     float: right;
+}
+
+.cn-pagination {
+    display: inline-block;
+}
+
+.cn-pagination ul {
+    margin: 0;
+}
+
+.cn-pagination li {
+    float: left;
+    box-shadow: 1px 1px 1px #ccc;
+    border-radius: 4px;
+    width: 18px;
+    display: block;
+    margin: 0 2px;
+    height: 27px;
+    line-height: 27px;
+    text-align: center;
+    border: 1px solid #aaa;
+    cursor: pointer;
+    font-size: 12px;
+    background: linear-gradient(to bottom, #fff, #ddd);
+    font-weight: bold;
+    text-shadow: 1px 1px 1px #fff;
+}
+
+.cn-pagination li:hover {
+    box-shadow: -1px -1px 1px #ccc;
+    background: linear-gradient(to top, #fff, #ddd);
+    text-shadow: -1px -1px 1px #fff;
+}
+
+.cn-pagination .active-page {
+    font-weight: normal;
+    color: #666;
+    cursor: default;
+    line-height: 29px;
+    height: 29px;
+    border: none;
+    background: none;
+    text-shadow: none;
+    box-shadow: none;
+    font-size: 16px;
+}
+
+.cn-pagination .active-page:hover {
+    background: none;
+    text-shadow: none;
+    box-shadow: none;
 }

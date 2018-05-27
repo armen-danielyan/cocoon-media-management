@@ -7,7 +7,7 @@
 Plugin Name: Cocoon Media Management
 Plugin URI: http://www.use-cocoon.nl/
 Description: Load images from Cocoon.
-Version: 1.04
+Version: 1.2.5
 Author: Cocoon Software Tech
 Author URI: http://www.use-cocoon.nl/
 License: GPLv2 or later
@@ -133,9 +133,15 @@ function CMM_NewForm() {
             <div id="cn-search-wrap" style="display: inline-block">
                 <input type="text" id="cn-form-search" placeholder="<?php _e('Search media items...', 'cocoon-media-management'); ?>" value="">
             </div>
+
+            <div class="cn-pagination"></div>
         </div>
 
         <div id="cn-content"></div>
+
+        <div id="cn-bottom">
+            <div class="cn-pagination"></div>
+        </div>
 
         <div id="cn-sidebar-right">
             <div class="cn-sidebar-wrap" style="display: none">
@@ -156,10 +162,19 @@ function CMM_NewForm() {
                     <span><?php _e('Available Sizes', 'cocoon-media-management'); ?></span>
                     <select id="cn-form-thumb-types">
 			            <?php $thumbTypes = $cocoonController->getThumbTypes();
+			            $convertedArr = [];
 			            if(!is_soap_fault($thumbTypes)) {
+				            $convertedArr['original'] = $thumbTypes['original'];
+
 				            foreach ( $thumbTypes as $key => $value ) {
 					            if ( $key !== 'original' ) {
-						            $opText = $key . ' ' . __( 'versie', 'cocoon-media-management' ) . '(' . __( 'width', 'cocoon-media-management' ) . ' ' . $value['width'] . 'px)';
+						            $convertedArr[$key] = $value;
+					            }
+				            }
+
+				            foreach ( $convertedArr as $key => $value ) {
+					            if ( $key !== 'original' ) {
+						            $opText = $key . ' ' . __( 'versie', 'cocoon-media-management' ) . ' (' . __( 'width', 'cocoon-media-management' ) . ' ' . $value['width'] . 'px)';
 					            } else {
 						            $opText = $key . ' ' . __( 'versie', 'cocoon-media-management' );
 					            } ?>
@@ -192,11 +207,11 @@ function CMM_NewForm() {
                 <label class="cn-form-label-wrap">
                     <span><?php _e('Size', 'cocoon-media-management'); ?></span>
                     <select id="cn-form-thumb-size">
+                        <option value="full"></option>
 	                    <?php $imageSizes = CMM_GetImageSizes();
 	                    foreach($imageSizes as $imageSize) { ?>
                             <option value="<?php echo $imageSize['name']; ?>"><?php echo ucfirst($imageSize['name']) . ' - ' . $imageSize['width'] . ' x ' . $imageSize['height']; ?></option>
                         <?php } ?>
-                        <option value="full"></option>
                     </select>
                 </label>
             </div>
@@ -239,8 +254,10 @@ function CMM_GetFilesBySet() {
 	$keyword = $_POST['keyword'] ? sanitize_text_field($_POST['keyword']) : '';
 
 	$setId = sanitize_text_field($_POST['setId']);
-	$pageNo = (int)sanitize_text_field($_POST['pageNo']);
-	$pagePer = 48;
+	$pageNo = (isset($_POST['pageNo']) && $_POST['pageNo'])
+        ? (int)sanitize_text_field($_POST['pageNo'])
+        : 1;
+	$pagePer = $cocoonController->thumbsPerPage;
 	$setFiles = [];
 
 	if($setId === 'all') {
@@ -261,7 +278,16 @@ function CMM_GetFilesBySet() {
 				    $setFilesTmp = array_merge($setFilesTmp, $filesBySet);
 				    foreach ( $setFilesTmp as $setFile ) {
 					    if (strpos($setFile['title'], $keyword) !== false || !$keyword) {
-						    array_push($setFiles, $setFile);
+						    $checkArr = false;
+					        foreach ($setFiles as $item) {
+					            if($item['id'] === $setFile['id']) {
+						            $checkArr = true;
+					                break;
+					            }
+                            }
+                            if(!$checkArr) {
+	                            array_push($setFiles, $setFile);
+                            }
 					    }
 				    }
                 }
@@ -269,17 +295,25 @@ function CMM_GetFilesBySet() {
 		}
     } else {
 		$filesBySet = $cocoonController->getFilesBySet( $setId );
-		if(!is_soap_fault($filesBySet)) {
-			$setFiles = $cocoonController->getFilesBySet( $setId );
-        }
+		$setFiles = is_soap_fault($filesBySet)
+            ? []
+            : $filesBySet;
     }
 
 	$thumbsCount = sizeof($setFiles);
-	$offset = $pageNo * $pagePer;
+	$offset = ($pageNo - 1) * $pagePer;
 	$max = $offset + $pagePer > $thumbsCount ? $thumbsCount : $offset + $pagePer;
+	$pages = ceil($thumbsCount / $pagePer);
 
 	for($i = $offset; $i < $max; $i++) {
 		$thumbInfo = $cocoonController->getThumbInfo( $setFiles[$i]['id'] );
+
+		$cnWebPath = $thumbInfo['web'] === ''
+            ? "icons/{$thumbInfo['ext']}.svg"
+            : getCachedFile($thumbInfo['name'], $thumbInfo['ext'], $thumbInfo['web'], 72, 'web');
+
+		$cnWebUrl = plugins_url($cnWebPath, __FILE__);
+
 		if(!is_soap_fault($thumbInfo)) { ?>
             <div class="cn-thumb" data-cnid="<?php echo $setFile['id']; ?>"
                  data-cnpath="<?php echo $thumbInfo['path']; ?>"
@@ -288,9 +322,9 @@ function CMM_GetFilesBySet() {
                  data-cnsize="<?php echo $thumbInfo['size']; ?>"
                  data-cndim="<?php echo $thumbInfo['dim']; ?>"
                  data-cnuploaded="<?php echo $thumbInfo['uploaded']; ?>"
-                 data-web="<?php echo $thumbInfo['web']; ?>"
+                 data-web="<?php echo $cnWebUrl; ?>"
                  data-cndomain="<?php echo $thumbInfo['domain']; ?>">
-                <div class="cn-image" style="background-image: url('<?php echo $thumbInfo["web"]; ?>')"></div>
+                <div class="cn-image" style="background-image: url('<?php echo $cnWebUrl; ?>')"></div>
                 <div class="cn-title"><?php echo $setFiles[$i]['title']; ?></div>
             </div>
         <?php }
@@ -298,10 +332,68 @@ function CMM_GetFilesBySet() {
 
 	$html = ob_get_contents();
 	ob_end_clean();
-	echo $html;
+
+	echo json_encode(array('data' => $html, 'pagination' => thumbPagination($pages, $pageNo)));
 
 	wp_die();
 };
+
+function thumbPagination($pages, $pageNo) {
+	$range = 2;
+	$showitems = ($range * 2) + 1;
+	ob_start(); ?>
+
+    <ul>
+    <?php if($pages > 1) {
+        if ($pageNo > 2 && $pageNo > $range + 1 && $showitems < $pages) echo '<li data-page="1" class="cn-page-item">&laquo;</li>';
+        if ($pageNo > 1 && $showitems < $pages) {
+            $pr = $pageNo - 1;
+            echo '<li data-page="' . $pr . '" class="cn-page-item">&lsaquo;</li>';
+        }
+        for ($i = 1; $i <= $pages; $i++) {
+            if (!($i >= $pageNo + $range + 1 || $i <= $pageNo - $range - 1) || $pages <= $showitems) { ?>
+                <li class="<?php if($pageNo === $i) echo 'active-page'; else echo 'cn-page-item'; ?>" data-page="<?php echo $i; ?>"><?php echo $i; ?></li>
+            <?php }
+        }
+        if ($pageNo < $pages && $showitems < $pages) {
+	        $po = $pageNo + 1;
+            echo '<li data-page="' . $po . '" class="cn-page-item">&rsaquo;</li>';
+        }
+        if ($pageNo < $pages - 1 && $pageNo + $range - 1 < $pages && $showitems < $pages) echo '<li data-page="' . $pages . '" class="cn-page-item">&raquo;</li>';
+    } ?>
+    </ul>
+
+	<?php $html = ob_get_contents();
+	ob_end_clean();
+    return $html;
+}
+
+function getCachedFile($file, $ext, $url, $hours = 72, $type) {
+	$cacheDir = plugin_dir_path(__FILE__) . 'cache';
+
+	$fileName = md5($file . $type . 'some_salt') . '.' . $ext;
+	$fileCachePath = "{$cacheDir}/{$fileName}";
+
+	$current_time = time();
+	$expire_time = $hours * 60 * 60;
+	$file_time = filemtime($fileCachePath);
+	if(!file_exists($fileCachePath) || !($current_time - $expire_time < $file_time)) {
+		wp_mkdir_p($cacheDir);
+		$content = getUrl($url);
+		file_put_contents($fileCachePath, $content);
+	}
+
+	return 'cache/' . $fileName;
+}
+
+function getUrl($url) {
+	$response = wp_remote_get($url, array(
+		'timeout' => 10
+	));
+	$body = is_array($response) ? $response['body'] : '';
+
+	return $body;
+}
 
 
 add_action( 'wp_ajax_cn_upload_image', 'CMM_UploadImage' );
@@ -321,11 +413,11 @@ function CMM_UploadImage() {
 
 	$res = wp_remote_get( $thumbURL );
 
-	$attachment = wp_upload_bits( $photoName . '.' .$fileNameExt, null, $res['body'], date( 'Y-m') );
+	$attachment = wp_upload_bits( $photoName . '.' . $fileNameExt, null, $res['body'], date( 'Y-m') );
 
 	$fileType = wp_check_filetype( basename( $attachment['file'] ), null );
 
-	$postinfo    = array(
+	$postinfo = array(
 		'post_mime_type' => $fileType['type'],
 		'post_title'     => $photoName,
 		'post_content'   => '',
@@ -337,18 +429,24 @@ function CMM_UploadImage() {
 	$my_image_meta = array('ID' => $attach_id);
 	$attr = [];
 
-	if($_POST['alt']) update_post_meta($attach_id, '_wp_attachment_image_alt', sanitize_text_field($_POST['alt']));
+	if($_POST['alt']) {
+	    update_post_meta($attach_id, '_wp_attachment_image_alt', sanitize_text_field($_POST['alt']));
+	}
 	if($_POST['title']) {
 	    $my_image_meta['post_title'] = sanitize_text_field($_POST['title']);
 		$attr['title'] = sanitize_text_field($_POST['title']);
 	}
-	if($_POST['caption']) $my_image_meta['post_excerpt'] = sanitize_text_field($_POST['caption']);
-	if(sizeof($my_image_meta) > 1) wp_update_post( $my_image_meta );
+	if($_POST['caption']) {
+	    $my_image_meta['post_excerpt'] = sanitize_text_field($_POST['caption']);
+	}
+	if(sizeof($my_image_meta) > 1) {
+	    wp_update_post( $my_image_meta );
+	}
 
 	$attach_data = wp_generate_attachment_metadata( $attach_id, $filename );
 	wp_update_attachment_metadata( $attach_id, $attach_data );
 
-    $html = wp_get_attachment_image( $attach_id, $photoSize, '', $attr );
+	$html = wp_get_attachment_link( $attach_id, $photoSize, false, '', false, $attr );
 
 	echo json_encode( array( 'status' => 'OK', 'data' => $html ) );
 
@@ -378,11 +476,13 @@ function CMM_GetSets() {
 	global $cocoonController;
 
 	$sets = $cocoonController->getSets();
+
 	if(is_soap_fault($sets)) {
 	    wp_die();
     }
     ob_start();
     $thumbsCount = 0;
+	usort($sets, sortCmp('title'));
     foreach ( $sets as $set ) { ?>
         <li>
             <input type="radio"
@@ -408,4 +508,10 @@ function CMM_GetSets() {
     echo $html;
 
 	wp_die();
+}
+
+function sortCmp($key) {
+	return function ($a, $b) use ($key) {
+		return strcasecmp($a[$key], $b[$key]);
+	};
 }

@@ -26,9 +26,7 @@ jQuery(function($) {
             uploaded: ""
         };
         var ajaxTimeout = 30000,
-            setId,
-            pageNo,
-            hasThumbs = true;
+            setId;
 
         $(document).on("click", ".cn-thumb", function() {
             selectedImage.path = $(this).data("cnpath");
@@ -50,66 +48,66 @@ jQuery(function($) {
             $("#cn-form-dim").text(selectedImage.dim);
             $("#cn-form-uploaded").text(selectedImage.uploaded);
             $("#cn-form-url").val(selectedImage.path);
-            $("#cn-form-thumb-size option:last").text("Full Size - " + selectedImage.dim);
+            $("#cn-form-thumb-size option:first").text("Full Size - " + selectedImage.dim);
         });
 
         $(document).on("change", ".cn-sets", function() {
             setId = $(this).val();
-            pageNo = 0;
-            hasThumbs = true;
-            getThumbs(pageNo);
+            getThumbs(1);
         });
 
-        $("#cn-content").on("scroll", function() {
-            if($("#cn-content").scrollTop() ===  $("#cn-content")[0].scrollHeight - $("#cn-content").outerHeight()) {
-                pageNo++;
-                getThumbs(pageNo);
-            }
+        $(document).on("click", ".cn-pagination .cn-page-item", function() {
+            var page = $(this).data("page");
+            getThumbs(page);
         });
 
         var getThumbs = function(page) {
-            if(hasThumbs) {
-                $("#cn-loader").show();
-                $("#cn-form-insert").attr("disabled", true);
-                $.ajax({
-                    url: wp_vars.ajax_url,
-                    data: {
-                        action: "get_files_by_set",
-                        setId: setId,
-                        keyword: $("#cn-form-search").val(),
-                        pageNo: page ? page : 0
-                    },
-                    type: "POST",
-                    timeout: ajaxTimeout,
-                    success: function (res) {
-                        if(!res) {
-                            hasThumbs = false;
-                        }
-                        $("#cn-loader").hide();
-                        if (page === 0) {
-                            $("#cn-content").scrollTop(0);
-                            $("#cn-content").html(res);
-                        } else {
-                            $("#cn-content").append(res);
-                        }
-                    },
-                    error: function () {
-                        $("#cn-loader").hide();
+            $("#cn-loader").show();
+            $("#cn-form-insert").attr("disabled", true);
+            $.ajax({
+                url: wp_vars.ajax_url,
+                data: {
+                    action: "get_files_by_set",
+                    setId: setId,
+                    keyword: $("#cn-form-search").val(),
+                    pageNo: page ? page : 1
+                },
+                type: "POST",
+                timeout: ajaxTimeout,
+                success: function (res) {
+                    if(!res) {
+                       return;
                     }
-                });
-            }
+                    var resObj = JSON.parse(res);
+                    $("#cn-loader").hide();
+                    $("#cn-content").html(resObj.data);
+                    $(".cn-pagination").html(resObj.pagination);
+                },
+                error: function () {
+                    $("#cn-loader").hide();
+                }
+            });
         };
 
         $("#cn-form-insert").on("click", function() {
             $("#cn-loader").show();
             var thumoType = $("#cn-form-thumb-types").val();
-            var uploadUrl = selectedImage.domain + thumoType + '/' + selectedImage.name + '.' + selectedImage.ext;
+
+            var selectedImageExt = selectedImage.ext;
+            var uploadUrl = (selectedImageExt === 'jpg' ||
+                selectedImageExt === 'png' ||
+                selectedImageExt === 'gif' ||
+                selectedImageExt === 'bmp'
+            )
+                ? selectedImage.domain + thumoType + '/' + selectedImage.name + '.' + selectedImageExt
+                : selectedImage.path;
+
             $.ajax({
                 url: wp_vars.ajax_url,
                 data: {
                     action: "cn_upload_image",
                     path: uploadUrl,
-                    ext: selectedImage.ext,
+                    ext: selectedImageExt,
                     name: selectedImage.name,
                     title: $("#cn-form-title").val(),
                     caption: $("#cn-form-caption").val(),
@@ -168,9 +166,7 @@ jQuery(function($) {
 
         $("#cn-form-search").bind("enterKey",function(e){
             setId = "search";
-            pageNo = 0;
-            hasThumbs = true;
-            getThumbs(pageNo);
+            getThumbs(1);
         });
         $("#cn-form-search").keyup(function(e){
             if(e.keyCode == 13) {

@@ -1,13 +1,18 @@
 <?php
 class CMM_Cocoon {
+	public static $domainName = 'use-cocoon.nl';
+
+	public $thumbsPerPage = 24;
+
 	public static function SoapClient($reqId) {
-		$domain = get_option('cmm_stng_domain');
+		$subDomain = get_option('cmm_stng_domain');
+		$domainName = self::$domainName;
 		$username = get_option('cmm_stng_username');
 		$requestId = $reqId;
 		$secretkey = get_option('cmm_stng_secret');
-		$wsdl = "https://{$domain}.use-cocoon.nl/webservice/wsdl";
+		$wsdl = "https://{$subDomain}.{$domainName}/webservice/wsdl";
 
-		$hash = sha1($domain . $username . $requestId . $secretkey);
+		$hash = sha1($subDomain . $username . $requestId . $secretkey);
 
 		$oAuth = new stdClass;
 		$oAuth->username = $username;
@@ -58,10 +63,13 @@ class CMM_Cocoon {
 	}
 
 	function getThumbInfo($fileId) {
-		$subdomain = get_option('cmm_stng_domain');
-		$url = "https://{$subdomain}.use-cocoon.com";
+		$subDomain = get_option('cmm_stng_domain');
+		$domainName = self::$domainName;
+		$url = "https://{$subDomain}.{$domainName}";
 		$thumbOrg = 'original';
 		$thumbWeb = '400px';
+
+		$noThumb = true;
 
 		$aThumbTypes = $this->getThumbTypes();
 		$thumbOrgPath = $aThumbTypes[$thumbOrg]['path'];
@@ -69,9 +77,17 @@ class CMM_Cocoon {
 
 		$aFile = $this->getFile($fileId);
 		$filename = $aFile['filename'];
-		$extention = $aFile['extension'];
+		$extention = strtolower($aFile['extension']);
 
-		$thumbTypeExtention = $thumbOrg == 'original' || $thumbOrg == 'gif' || $thumbOrg == 'png' ? $extention : 'jpg';
+		if($extention === 'jpg' ||
+		   $extention === 'png' ||
+		   $extention === 'gif' ||
+		   $extention === 'tiff' ||
+		   $extention === 'bmp'
+		) {
+			$noThumb = false;
+		}
+
 		$fileDim = $aFile['width'] && $aFile['height'] ? $aFile['width'] . ' x ' . $aFile['height'] : '';
 		$fileSize = $aFile['size'] ? round($aFile['size'] / 1024) . ' KB' : '';
 
@@ -83,9 +99,9 @@ class CMM_Cocoon {
 		}
 
 		return array(
-			'path' => $url . $thumbOrgPath . '/' . $filename . '.' . $thumbTypeExtention,
-			'web' => $url . $thumbWebPath . '/' . $filename . '.' . $thumbTypeExtention,
-			'ext' => $thumbTypeExtention,
+			'path' => $url . $thumbOrgPath . '/' . $filename . '.' . $extention,
+			'web' => !$noThumb ? $url . $thumbWebPath . '/' . $filename . '.' . $extention : '',
+			'ext' => $extention,
 			'name' => $filename,
 			'dim' => $fileDim,
 			'size' => $fileSize,
