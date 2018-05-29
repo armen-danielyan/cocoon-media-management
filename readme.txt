@@ -2,7 +2,7 @@
 Tags: gallery, photo gallery, image gallery, wordpress gallery plugin, photo albums, wordpress photo gallery plugin
 Requires at least: 3.3
 Tested up to: 4.9.6
-Stable tag: 1.2.5
+Stable tag: 1.2.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,6 +34,12 @@ Login to the WordPress Administrator Panel.
 Activate Cocoon Media Management by going to Plugins and pressing Activate button.
 
 == Changelog ==
+
+= 1.2.7 =
+*  Fix small bugs
+
+= 1.2.6 =
+*  Fix small bugs
 
 = 1.2.5 =
 *  Add pagination

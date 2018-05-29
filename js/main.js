@@ -1,5 +1,5 @@
-jQuery(function($) {
-    $(document).ready(function() {
+jQuery(function ($) {
+    $(document).ready(function () {
         $.ajax({
             url: wp_vars.ajax_url,
             data: {
@@ -12,7 +12,7 @@ jQuery(function($) {
                 $("#cn-sets-list").html(res);
                 $(".cn-sets[value=all]").prop("checked", true).trigger("change");
             },
-            error: function(){
+            error: function () {
                 $("#cn-loader").hide();
             }
         });
@@ -28,7 +28,7 @@ jQuery(function($) {
         var ajaxTimeout = 30000,
             setId;
 
-        $(document).on("click", ".cn-thumb", function() {
+        $(document).on("click", ".cn-thumb", function () {
             selectedImage.path = $(this).data("cnpath");
             selectedImage.name = $(this).data("cnname");
             selectedImage.ext = $(this).data("cnext");
@@ -51,17 +51,17 @@ jQuery(function($) {
             $("#cn-form-thumb-size option:first").text("Full Size - " + selectedImage.dim);
         });
 
-        $(document).on("change", ".cn-sets", function() {
+        $(document).on("change", ".cn-sets", function () {
             setId = $(this).val();
             getThumbs(1);
         });
 
-        $(document).on("click", ".cn-pagination .cn-page-item", function() {
+        $(document).on("click", ".cn-pagination .cn-page-item", function () {
             var page = $(this).data("page");
             getThumbs(page);
         });
 
-        var getThumbs = function(page) {
+        var getThumbs = function (page) {
             $("#cn-loader").show();
             $("#cn-form-insert").attr("disabled", true);
             $.ajax({
@@ -75,8 +75,8 @@ jQuery(function($) {
                 type: "POST",
                 timeout: ajaxTimeout,
                 success: function (res) {
-                    if(!res) {
-                       return;
+                    if (!res) {
+                        return;
                     }
                     var resObj = JSON.parse(res);
                     $("#cn-loader").hide();
@@ -89,7 +89,7 @@ jQuery(function($) {
             });
         };
 
-        $("#cn-form-insert").on("click", function() {
+        $("#cn-form-insert").on("click", function () {
             $("#cn-loader").show();
             var thumoType = $("#cn-form-thumb-types").val();
 
@@ -121,14 +121,14 @@ jQuery(function($) {
                     var resObj = JSON.parse(res);
                     window.parent.send_to_editor(resObj['data']);
                 },
-                error: function(){
+                error: function () {
                     $("#cn-loader").hide();
                 }
             });
         });
 
         var cnErrMsg = document.getElementById("cn-error-msg");
-        if(!cnErrMsg){
+        if (!cnErrMsg) {
             $.ajax({
                 url: wp_vars.ajax_url,
                 data: {
@@ -138,15 +138,15 @@ jQuery(function($) {
                 timeout: ajaxTimeout,
                 success: function (res) {
                     var resObj = JSON.parse(res);
-                    if(resObj.status === 'OK') {
+                    if (resObj.status === 'OK') {
                         $("#cn-thumb-up").show();
                         $("#cn-thumb-down").hide();
-                    } else if(resObj.status === 'error') {
+                    } else if (resObj.status === 'error') {
                         $("#cn-thumb-down").show();
                         $("#cn-thumb-up").hide();
                     }
                 },
-                error: function(){
+                error: function () {
                     $("#cn-loader").hide();
                 }
             });
@@ -164,12 +164,12 @@ jQuery(function($) {
             $("#cn-form-alt").val("");
         }
 
-        $("#cn-form-search").bind("enterKey",function(e){
+        $("#cn-form-search").bind("enterKey", function (e) {
             setId = "search";
             getThumbs(1);
         });
-        $("#cn-form-search").keyup(function(e){
-            if(e.keyCode == 13) {
+        $("#cn-form-search").keyup(function (e) {
+            if (e.keyCode == 13) {
                 $(this).trigger("enterKey");
             }
         });
