@@ -1,9 +1,18 @@
 <?php
 
 class CMM_Cocoon {
+	function __construct() {
+		$this->thumbTypes = $this->getThumbTypes();
+		$this->subDomain  = get_option( 'cmm_stng_domain' );
+	}
+
 	public static $domainName = 'use-cocoon.nl';
 
+	public $subDomain;
+
 	public $thumbsPerPage = 24;
+
+	public $thumbTypes;
 
 	public static function SoapClient( $reqId ) {
 		$subDomain  = get_option( 'cmm_stng_domain' );
@@ -20,6 +29,9 @@ class CMM_Cocoon {
 		$oAuth->requestId = $requestId;
 		$oAuth->hash      = $hash;
 
+		if ( ! extension_loaded( 'soap' ) ) {
+			throw new Exception( 'PHP_Soap extension is not installed, please contact your server administrator' );
+		}
 		$oSoapClient = new SoapClient( $wsdl );
 		$SoapHeader  = new SoapHeader( 'auth', 'authenticate', $oAuth );
 		$oSoapClient->__setSoapHeaders( $SoapHeader );
@@ -32,6 +44,8 @@ class CMM_Cocoon {
 			$output = self::SoapClient( $this->getRequestId() )->getThumbtypes();
 		} catch ( SoapFault $oSoapFault ) {
 			$output = $oSoapFault;
+		} catch(Exception $e) {
+			$output = $e->getMessage();
 		}
 
 		return $output;
@@ -42,6 +56,8 @@ class CMM_Cocoon {
 			$output = self::SoapClient( $this->getRequestId() )->getSets();
 		} catch ( SoapFault $oSoapFault ) {
 			$output = $oSoapFault;
+		} catch(Exception $e) {
+			$output = $e->getMessage();
 		}
 
 		return $output;
@@ -52,6 +68,8 @@ class CMM_Cocoon {
 			$output = self::SoapClient( $this->getRequestId() )->getFilesBySet( $setId );
 		} catch ( SoapFault $oSoapFault ) {
 			$output = $oSoapFault;
+		} catch(Exception $e) {
+			$output = $e->getMessage();
 		}
 
 		return $output;
@@ -62,33 +80,42 @@ class CMM_Cocoon {
 			$output = self::SoapClient( $this->getRequestId() )->getFile( $fileId );
 		} catch ( SoapFault $oSoapFault ) {
 			$output = $oSoapFault;
+		} catch(Exception $e) {
+			$output = $e->getMessage();
 		}
 
 		return $output;
 	}
 
-	function getThumbInfo( $fileId ) {
-		$subDomain  = get_option( 'cmm_stng_domain' );
+	function getThumbInfo( $aFile ) {
+		$subDomain  = $this->subDomain;
 		$domainName = self::$domainName;
 		$url        = "https://{$subDomain}.{$domainName}";
 		$thumbOrg   = 'original';
 		$thumbWeb   = '400px';
+		$thumbWeb2  = 'web';
 
 		$noThumb = true;
 
-		$aThumbTypes  = $this->getThumbTypes();
-		$thumbOrgPath = $aThumbTypes[ $thumbOrg ]['path'];
-		$thumbWebPath = $aThumbTypes[ $thumbWeb ]['path'];
+		$aThumbTypes = $this->thumbTypes;
 
-		$aFile     = $this->getFile( $fileId );
+		$thumbOrgPath = $aThumbTypes[ $thumbOrg ]['path'];
+
+		if ( $aThumbTypes[ $thumbWeb ]['path'] == null ) {
+			if ( $aThumbTypes[ $thumbWeb2 ]['path'] == null ) {
+				$thumbWebPath = $thumbOrgPath;
+			} else {
+				$thumbWebPath = $aThumbTypes[ $thumbWeb2 ]['path'];
+			}
+		} else {
+			$thumbWebPath = $aThumbTypes[ $thumbWeb ]['path'];
+		}
+
 		$filename  = $aFile['filename'];
 		$extention = strtolower( $aFile['extension'] );
 
 		if ( $extention === 'jpg' ||
-		     $extention === 'png' ||
-		     $extention === 'gif' ||
-		     $extention === 'tiff' ||
-		     $extention === 'bmp'
+		     $extention === 'png'
 		) {
 			$noThumb = false;
 		}
@@ -119,15 +146,13 @@ class CMM_Cocoon {
 		return (string) microtime( true );
 	}
 
-	private function errorResponse( $errMsg ) {
-		return json_encode( array( 'status' => 'error', 'statusMsg' => $errMsg ) );
-	}
-
 	function getVersion() {
 		try {
 			$output = self::SoapClient( $this->getRequestId() )->getVersion();
 		} catch ( SoapFault $oSoapFault ) {
 			$output = $oSoapFault;
+		} catch(Exception $e) {
+			$output = $e;
 		}
 
 		return $output;

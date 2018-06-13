@@ -1,39 +1,68 @@
 === Cocoon Media Management ===
-Tags: gallery, photo gallery, image gallery, wordpress gallery plugin, photo albums, wordpress photo gallery plugin
+Tags: DAM, Brand management, media bank, wordpress galerij plugin, media galerij, online beeldbank, online beeldarchief
 Requires at least: 3.3
 Tested up to: 4.9.6
-Stable tag: 1.2.7
+Stable tag: 1.3.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Cocoon Media Management is a image gallery plugin with a list of advanced options for downloading images from Cocoon media bank and inserting images to your website.
+Deze plugin verbindt jouw WordPress website met de gebruiksvriendelijke media management software van Cocoon (https://use-cocoon.nl/).
 
 == Description ==
+Deze plugin verbindt jouw WordPress website met de gebruiksvriendelijke media management software van Cocoon (https://use-cocoon.nl/). Met deze plugin zijn alle visuals die jij nodig hebt direct beschikbaar vanuit de Cocoon online beeldbank in jouw WordPress omgeving.
 
-This plugin is the official user friendly Wordpress plugin for integration with SaaS Media Management Software - Cocoon (use-cocoon.nl).
-This plugin sends / requests the stored media from the Cocoon web service and gets the corresponding media for easy usage in Wordpress. No personal data or any other information are sent to the web service. The web service is hosted at https://wordpress.use-cocoon.nl/webservice/wsdl.
+Cocoon is dé mediabank voor marketing- en communicatieprofessionals, ook wel Digital Asset Management genoemd (DAM). Slimme marketing software voor het eenvoudig opslaan, managen, vinden en delen van allerlei soorten content, waar en wanneer dan ook, met wie dan ook. Jouw waardevolle marketingbestanden op één centrale locatie voor maximale efficiëntie en volledige grip op jouw merkidentiteit.
 
-Save & share media files in the cloud
-Cocoon is easy-to-use Digital Asset Management software for marketing and communication professionals. Manage your precious media files in a central location in the cloud and keep control over your brand identity.
+== Ervaar de voordelen ==
+•	Een simpele mediabibliotheek die je faciliteert in het bouwen van toffe pagina’s en posts.
+•	24/7 toegang tot al jouw visuals in WordPress.
+•	Tijdbesparend: het managen en vinden van content was nog nooit zo eenvoudig.
+•	Veilig beheren en gebruiken van allerlei content in de media galerij.
+•	Gemakkelijk en snel de juiste visuals op de juiste plek.
+•	Brand management: jij als administrator houdt altijd de controle over welke mediabestanden er beschikbaar worden gesteld via de plugin.
+
+Wil jij kennismaken met Cocoon? Vraag direct de gratis demo aan. (LINKJE: https://use-cocoon.nl/demo-aanvragen/)
+
+== Screenshots ==
+1. Cocoon Media Management - WordPress Plugin screen 1
+2. Cocoon Media Management - WordPress Plugin screen 2
+3. Cocoon Media Management - WordPress Plugin screen 3
+4. Cocoon Media Management - WordPress Plugin screen 4
 
 == Installation ==
+#### De administrator van jouw Cocoon kan deze koppeling met WordPress activeren. Volg onderstaande stappen om de plugin te installeren voor jouw WordPress website.
 
-#### Thank you for your interest in Cocoon Media Management.
+**I.    Installatie instructies**
+1.	Log in op jouw hostingplek met FTP software, bijv. FileZilla.
+2.	Pak het gedownloade zipbestand van de Cocoon plugin folder uit zonder hier zaken in aan te passen.
+3.	Upload de plugin op de volgende locatie: wp-content > wp-plugins.
+4.	Log in op het WordPress Administrator Panel en activeer de Cocoon plugin door naar ‘plugins’ te gaan en op het knopje ‘activeer’ te klikken.
 
-**Installing via WordPress**
-Follow the steps below to install WordPress Cocoon Media Management Plugin to your website.
-Log-in to your WordPress administrator panel.
-Select Plugins page from toolbar menu, click Add New.
-Search for Cocoon Media Management in the right-top search bar.
+**II.	Plugin activeren**
+1.	Neem contact op met de Cocoon supportafdeling en vraag jouw gebruikersnaam en unieke code (API key) aan.
+2.	Activeer met deze gegevens de plugin.
 
-**Installing via FTP**
-Login to your hosting space via an FTP software, e.g. FileZilla.
-Unzip the downloaded Cocoon Media Management plugin folder without making any changes to the folder.
-Upload the Cocoon Media Management plugin into the following location wp-content>wp-plugins.
-Login to the WordPress Administrator Panel.
-Activate Cocoon Media Management by going to Plugins and pressing Activate button.
+Het is gelukt, veel plezier!
+
+**Hulp nodig bij het installeren?**
+Heb je hulp nodig bij het installeren van de WordPress-Cocoon plugin? Bezoek onze website voor meer informatie (https://use-cocoon.nl/) of neem contact met ons op via support@use-cocoon.nl. Je kan ons ook bereiken via +31 (0)23 554 67 55. Team Cocoon helpt je graag verder.
+
+== Frequently Asked Questions ==
+= Kan ik deze plugin gebruiken zonder Cocoon? =
+Dat is helaas niet mogelijk. Je bent natuurlijk wel welkom om de voordelen van Cocoon zelf te ervaren. Vraag hier de gratis demo aan. (LINKJE: https://use-cocoon.nl/demo-aanvragen/)
 
 == Changelog ==
+= 1.3.7 =
+*  Remove All sets option
+*  Fix small bugs
+
+= 1.3.5 =
+*  Fix Check Soap Extension
+*  Fix Clear options after plugin deactivation
+
+= 1.3.0 =
+*  Fix get thumbs performance
+*  Fix thumbs urls
 
 = 1.2.7 =
 *  Fix small bugs

@@ -10,7 +10,7 @@
     height: 35px;
     overflow: hidden;
     top: 0;
-    left: 201px;
+    left: 241px;
     right: 300px;
     padding: 15px 15px 0 15px;
     background-color: #fff;
@@ -21,15 +21,15 @@
     height: 35px;
     overflow: hidden;
     bottom: 65px;
-    left: 201px;
+    left: 241px;
     right: 300px;
-    padding: 0 15px 15px 15px;
+    padding: 7px 15px 15px 8px;
     background-color: #fff;
 }
 
 #cn-sidebar {
     position: absolute;
-    width: 200px;
+    width: 240px;
     overflow: auto;
     top: 0;
     bottom: 65px;
@@ -40,10 +40,10 @@
 #cn-content {
     position: absolute;
     background-color: #fff;
-    top: 50px;
-    left: 201px;
+    top: 51px;
+    left: 241px;
     right: 300px;
-    bottom: 115px;
+    bottom: 123px;
     overflow: auto;
     outline: 0;
     padding: 15px;
@@ -60,7 +60,7 @@
 }
 
 .cn-sidebar-wrap {
-    margin: 0 15px;
+    margin: 0 10px;
 }
 
 .cn-sidebar-wrap #cn-sets-list li {
@@ -69,7 +69,7 @@
 }
 
 .cn-sidebar-wrap #cn-sets-list label {
-    width: 130px;
+    width: 170px;
     display: inline-block;
 }
 
@@ -131,7 +131,7 @@
 .cn-thumb .cn-image {
     width: 100%;
     height: 120px;
-    background-size: auto 120px;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
 }

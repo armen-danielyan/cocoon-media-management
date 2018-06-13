@@ -1,13 +1,13 @@
 <?php
 /**
  * @package Cocoon Media Management
- * @version 1.2.7
+ * @version 1.3.7
  */
 /*
 Plugin Name: Cocoon Media Management
 Plugin URI: http://www.use-cocoon.nl/
 Description: Load images from Cocoon.
-Version: 1.2.7
+Version: 1.3.7
 Author: Cocoon Software Tech
 Author URI: http://www.use-cocoon.nl/
 License: GPLv2 or later
@@ -19,9 +19,31 @@ Text Domain: use-cocoon.nl
 /**
  * Prevent Direct Access
  */
-
 defined( 'ABSPATH' ) or die( 'Direct Access to This File is Not Allowed.' );
-define( 'CMM_VERSION', '1.2.7' );
+define( 'CMM_VERSION', '1.3.7' );
+
+/**
+ * Run when plugin Activated
+ */
+register_activation_hook( __FILE__, 'pluginActivation' );
+
+function pluginActivation() {
+	update_option( 'cmm_stng_domain', '' );
+	update_option( 'cmm_stng_username', '' );
+	update_option( 'cmm_stng_secret', '' );
+}
+
+/**
+ * Run when plugin Deactivated
+ */
+register_deactivation_hook( __FILE__, 'pluginDeactivation' );
+
+function pluginDeactivation() {
+	delete_option( 'cmm_stng_domain' );
+	delete_option( 'cmm_stng_username' );
+	delete_option( 'cmm_stng_secret' );
+}
+
 
 require_once( 'lib/CocoonController.php' );
 $cocoonController = new CMM_Cocoon();
@@ -54,6 +76,10 @@ function CMM_CocoonSettingsPage() { ?>
     <div class="wrap">
         <h1><?php _e( 'Cocoon Settings', 'cocoon-media-management' ); ?></h1>
 
+		<?php if ( ! soapExtensionEnabled() ) {
+			echo '<p style="color: red">PHP_Soap extension is not installed, please contact your server administrator</p>';
+		}; ?>
+
         <form method="post" action="options.php">
 			<?php settings_fields( 'cocoon-main-group' ); ?>
 			<?php do_settings_sections( 'cocoon-main-group' ); ?>
@@ -83,16 +109,21 @@ function CMM_CocoonSettingsPage() { ?>
 
                 <tr valign="top">
                     <th scope="row"><input type="submit" name="submit" id="submit" class="button button-primary"
-                                           value="<?php _e( 'Save Settings', 'cocoon-media-management' ); ?>"></th>
+                                           value="<?php _e( 'Save Settings', 'cocoon-media-management' ); ?>">
+                        <span id="cn-cred-check-loader" style="display: none;">
+                            <img width="32" height="32"
+                                 src="<?php echo plugin_dir_url( __FILE__ ) . 'img/cn_loader.gif' ?>">
+                        </span>
+                    </th>
                     <td>
-                        <p style="display: none" id="cn-thumb-up"><img width="32" height="32"
+                        <p style="display: none" id="cn-thumb-up"><img width="24" height="24"
                                                                        src="<?php echo plugin_dir_url( __FILE__ ) . 'img/thumb_up.png' ?>"> <?php _e( 'Cocoon account successfully connected.', 'cocoon-media-management' ); ?>
                         </p>
-                        <p style="display: none" id="cn-thumb-down"><img width="32" height="32"
+                        <p style="display: none" id="cn-thumb-down"><img width="24" height="24"
                                                                          src="<?php echo plugin_dir_url( __FILE__ ) . 'img/thumb_down.png' ?>"> <?php _e( 'You have entered wrong Cocoon API credentials, please try again.', 'cocoon-media-management' ); ?>
                         </p>
 						<?php if ( ! get_option( 'cmm_stng_domain' ) || ! get_option( 'cmm_stng_username' ) || ! get_option( 'cmm_stng_secret' ) ) { ?>
-                            <p id="cn-error-msg"><?php _e( 'Please enter your Cocoon API credentials.', 'cocoon-media-management' ); ?></p>
+                            <span id="cn-error-msg"><?php _e( 'Please enter your Cocoon API credentials.', 'cocoon-media-management' ); ?></span>
 						<?php } ?>
                     </td>
                 </tr>
@@ -121,7 +152,12 @@ function CMM_AddNewForm() {
 }
 
 function CMM_NewForm() {
+	if ( ! soapExtensionEnabled() ) {
+		wp_die();
+	};
+
 	global $cocoonController;
+
 	media_upload_header(); ?>
 
     <div id="cn-wrap">
@@ -254,7 +290,18 @@ add_action( 'wp_ajax_get_files_by_set', 'CMM_GetFilesBySet' );
 add_action( 'wp_ajax_nopriv_get_files_by_set', 'CMM_GetFilesBySet' );
 
 function CMM_GetFilesBySet() {
+	if ( ! soapExtensionEnabled() ) {
+		echo json_encode( array(
+			'status'   => 'error',
+			'code'     => 1,
+			'errorMsg' => 'PHP_Soap extension is not installed, please contact your server administrator'
+		) );
+
+		wp_die();
+	};
+
 	global $cocoonController;
+
 	ob_start();
 
 	if ( ! $_POST['setId'] ) {
@@ -270,14 +317,7 @@ function CMM_GetFilesBySet() {
 	$pagePer  = $cocoonController->thumbsPerPage;
 	$setFiles = [];
 
-	if ( $setId === 'all' ) {
-		$sets = $cocoonController->getSets();
-		if ( ! is_soap_fault( $sets ) ) {
-			foreach ( $sets as $set ) {
-				$setFiles = array_merge( $setFiles, $cocoonController->getFilesBySet( $set['id'] ) );
-			}
-		}
-	} else if ( $setId === 'search' ) {
+	if ( $setId === 'search' ) {
 		$setFilesTmp = [];
 		$sets        = $cocoonController->getSets();
 
@@ -316,7 +356,7 @@ function CMM_GetFilesBySet() {
 	$pages       = ceil( $thumbsCount / $pagePer );
 
 	for ( $i = $offset; $i < $max; $i ++ ) {
-		$thumbInfo = $cocoonController->getThumbInfo( $setFiles[ $i ]['id'] );
+		$thumbInfo = $cocoonController->getThumbInfo( $setFiles[ $i ] );
 
 		if ( $thumbInfo['web'] === '' ) {
 			$filePath  = "icons/{$thumbInfo['ext']}.svg";
@@ -352,8 +392,6 @@ function CMM_GetFilesBySet() {
 
 	wp_die();
 }
-
-;
 
 function thumbPagination( $pages, $pageNo ) {
 	$range     = 2;
@@ -484,13 +522,23 @@ add_action( 'wp_ajax_check_creds', 'CMM_CheckCreds' );
 add_action( 'wp_ajax_nopriv_check_creds', 'CMM_CheckCreds' );
 
 function CMM_CheckCreds() {
+	if ( ! soapExtensionEnabled() ) {
+		echo json_encode( array(
+			'status'   => 'error',
+			'code'     => 1,
+			'errorMsg' => 'PHP_Soap extension is not installed, please contact your server administrator'
+		) );
+
+		wp_die();
+	};
+
 	global $cocoonController;
 
 	$result = $cocoonController->getVersion();
 	if ( ! is_soap_fault( $result ) ) {
 		echo json_encode( array( 'status' => 'OK' ) );
 	} else {
-		echo json_encode( array( 'status' => 'error' ) );
+		echo json_encode( array( 'status' => 'error', 'code' => 2 ) );
 	}
 
 	wp_die();
@@ -500,6 +548,16 @@ add_action( 'wp_ajax_cn_get_sets', 'CMM_GetSets' );
 add_action( 'wp_ajax_nopriv_cn_get_sets', 'CMM_GetSets' );
 
 function CMM_GetSets() {
+	if ( ! soapExtensionEnabled() ) {
+		echo json_encode( array(
+			'status'   => 'error',
+			'code'     => 1,
+			'errorMsg' => 'PHP_Soap extension is not installed, please contact your server administrator'
+		) );
+
+		wp_die();
+	};
+
 	global $cocoonController;
 
 	$sets = $cocoonController->getSets();
@@ -508,7 +566,6 @@ function CMM_GetSets() {
 		wp_die();
 	}
 	ob_start();
-	$thumbsCount = 0;
 	usort( $sets, sortCmp( 'title' ) );
 	foreach ( $sets as $set ) { ?>
         <li>
@@ -521,19 +578,7 @@ function CMM_GetSets() {
 			} ?>>
             <label for="<?php echo 'cn' . $set['id']; ?>"><?php echo $set['title'] . ' (' . $set['file_count'] . ')'; ?></label>
         </li>
-		<?php
-		$thumbsCount += (int) $set['file_count'];
-	} ?>
-    <li>
-        <input type="radio"
-               id="cnall"
-               class="cn-sets"
-               name="sets"
-               value="all" <?php if ( $thumbsCount == 0 ) {
-			echo 'disabled';
-		} ?>>
-        <label for="cnall"><?php _e( 'All', 'cocoon-media-management' ); ?> (<?php echo $thumbsCount; ?>)</label>
-    </li>
+	<?php } ?>
 	<?php $html = ob_get_contents();
 	ob_end_clean();
 	echo $html;
@@ -545,4 +590,28 @@ function sortCmp( $key ) {
 	return function ( $a, $b ) use ( $key ) {
 		return strcasecmp( $a[ $key ], $b[ $key ] );
 	};
+}
+
+function getUniqueFiles( $files ) {
+	$t        = false;
+	$setFiles = [];
+	for ( $i = 0; $i < sizeof( $files ); $i ++ ) {
+		for ( $j = $i + 1; $j < sizeof( $files ); $j ++ ) {
+			if ( $files[ $i ]['id'] === $files[ $j ]['id'] ) {
+				$t = true;
+				break;
+			}
+		}
+		if ( ! $t ) {
+			array_push( $setFiles, $files[ $i ] );
+		} else {
+			$t = false;
+		}
+	}
+
+	return $setFiles;
+}
+
+function soapExtensionEnabled() {
+	return extension_loaded( 'soap' );
 }

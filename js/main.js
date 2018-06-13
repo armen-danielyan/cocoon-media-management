@@ -1,16 +1,20 @@
 jQuery(function ($) {
     $(document).ready(function () {
+        var ajaxTimeout = 60000;
+
         $.ajax({
             url: wp_vars.ajax_url,
             data: {
                 action: "cn_get_sets"
             },
             type: "POST",
-            timeout: 30000,
+            timeout: ajaxTimeout,
             success: function (res) {
-                // $("#cn-loader").hide();
+                if(res['status'] === 'error') return;
+
                 $("#cn-sets-list").html(res);
-                $(".cn-sets[value=all]").prop("checked", true).trigger("change");
+                var cnSets = $(".cn-sets:first");
+                cnSets.prop("checked", true).trigger("change");
             },
             error: function () {
                 $("#cn-loader").hide();
@@ -25,8 +29,7 @@ jQuery(function ($) {
             dim: "",
             uploaded: ""
         };
-        var ajaxTimeout = 30000,
-            setId;
+        var setId;
 
         $(document).on("click", ".cn-thumb", function () {
             selectedImage.path = $(this).data("cnpath");
@@ -75,7 +78,7 @@ jQuery(function ($) {
                 type: "POST",
                 timeout: ajaxTimeout,
                 success: function (res) {
-                    if (!res) {
+                    if (!res || res['status'] === 'error') {
                         return;
                     }
                     var resObj = JSON.parse(res);
@@ -117,6 +120,7 @@ jQuery(function ($) {
                 type: "POST",
                 timeout: ajaxTimeout,
                 success: function (res) {
+                    if(res['status'] === 'error') return;
                     $("#cn-loader").hide();
                     var resObj = JSON.parse(res);
                     window.parent.send_to_editor(resObj['data']);
@@ -129,6 +133,7 @@ jQuery(function ($) {
 
         var cnErrMsg = document.getElementById("cn-error-msg");
         if (!cnErrMsg) {
+            $("#cn-cred-check-loader").fadeIn('fast');
             $.ajax({
                 url: wp_vars.ajax_url,
                 data: {
@@ -139,11 +144,17 @@ jQuery(function ($) {
                 success: function (res) {
                     var resObj = JSON.parse(res);
                     if (resObj.status === 'OK') {
-                        $("#cn-thumb-up").show();
-                        $("#cn-thumb-down").hide();
-                    } else if (resObj.status === 'error') {
-                        $("#cn-thumb-down").show();
-                        $("#cn-thumb-up").hide();
+                        $("#cn-cred-check-loader").fadeOut('fast', function() {
+                            $("#cn-thumb-up").fadeIn('fast');
+                            $("#cn-thumb-down").fadeOut('fast');
+                        });
+                    } else if (resObj.status === 'error' && resObj['code'] === 2) {
+                        $("#cn-cred-check-loader").fadeOut('fast', function() {
+                            $("#cn-thumb-down").fadeIn('fast');
+                            $("#cn-thumb-up").fadeOut('fast');
+                        });
+                    } else {
+                        $("#cn-cred-check-loader").fadeOut('fast');
                     }
                 },
                 error: function () {

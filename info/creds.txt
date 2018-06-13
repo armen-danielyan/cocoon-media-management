@@ -5,3 +5,7 @@ secret: uP2&SjSvG7lJFTZH7D3r_.VKlqejyw6Q
 subdomain: staging
 user: stagingwordpress
 secret: xi*{Xd({@,2s{T-5EECk6wW6IjM@_+gk
+
+subdomain: atag
+user: ATAGAPI2016
+secret: !L7$)$&L04`E:ki:[b;I8A4dLaR?Cq,o
